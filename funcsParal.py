@@ -161,4 +161,115 @@ def computeOneSolutionWith5AdjPairs(inData):
     FVecTmp=sopt.fsolve(eqn5AdjPairs,[np.real(FEst),np.imag(FEst)],args=(n,lmd),maxfev=100,xtol=1e-3)
     return [n, lmd, FVecTmp[0], FVecTmp[1]]
 
+def selectTrueRoot(exactRoots,asympRoot):
+    """
 
+    :param exactRoots: roots solved by np.roots
+    :param asympRoot: asymtotic root
+    :return:
+    """
+    diffAbs=[np.abs(elem-asympRoot) for elem in exactRoots]
+    inds=np.argsort(diffAbs)
+    return exactRoots[inds[0]]
+
+def eqnLargeLambdaLowerSymPair(FIn,*data):
+    """
+
+    :param FIn:trial eigenvalue, in the form of [re, im]
+    :param data: (n, lmd)
+    :return:
+    """
+    n, lmd = data
+    F = FIn[0] + FIn[1]
+    coefEqn=[-1j,0,0,lmd,0,-F]
+    trueRootsAll=np.roots(coefEqn)
+
+    ###############asymp roots when large lambda >>|F|^(3/5)
+    y3n0s = [np.exp(1j * (4 * n * np.pi - np.pi) / 6) * lmd ** (1 / 3) for n in range(0, 3)]
+
+    y3ns = [ytmp + F * 1 / (2 * lmd * ytmp - 5 * 1j * ytmp ** 4) for ytmp in y3n0s]
+
+    selectedRoots=[selectTrueRoot(trueRootsAll,elem) for elem in y3ns]
+
+    sortedRootsByAngle=sorted(selectedRoots,key=np.angle)
+    #taking lower pair
+    x2Tmp=sortedRootsByAngle[0]
+    x1Tmp=sortedRootsByAngle[1]
+    retVals=[]
+    #cis
+    tmpCis=integralQuad(lmd,F,x1Tmp,x2Tmp)-(n+1/2)*np.pi
+    retVals.append(tmpCis)
+
+    #trans
+    tmpTrans=integralQuad(lmd,F,x2Tmp,x1Tmp)-(n+1/2)*np.pi
+    retVals.append(tmpTrans)
+    #cis another
+    tmpCisAnother=integralQuadBranchAnother(lmd,F,x1Tmp,x2Tmp)-(n+1/2)*np.pi
+    retVals.append(tmpCisAnother)
+    #trans another
+    tmpTransAnother=integralQuadBranchAnother(lmd,F,x2Tmp,x1Tmp)-(n+1/2)*np.pi
+    retVals.append(tmpTransAnother)
+
+    sortedRet=sorted(retVals,key=np.abs)
+    root0=sortedRet[0]
+    return np.real(root0),np.imag(root0)
+
+def computeOneSolWithLargeLambdaLower(inData):
+    """
+
+    :param inData: [n, lambda, Fest]
+    :return: [n, lambda, re(F), im(F)]
+    """
+    n, lmd, FEst = inData
+    FVecTmp = sopt.fsolve(eqnLargeLambdaLowerSymPair, [np.real(FEst), np.imag(FEst)], args=(n, lmd), maxfev=100, xtol=1e-6)
+    return [n, lmd, FVecTmp[0], FVecTmp[1]]
+
+
+def eqnLargeLambdaUpperSymPair(FIn,*data):
+    """
+
+    :param FIn: trial eigenvalue, in the form of [re, im]
+    :param data: (n, lmd)
+    :return:
+    """
+    n, lmd = data
+    F = FIn[0] + FIn[1]
+    coefEqn = [-1j, 0, 0, lmd, 0, -F]
+    trueRootsAll = np.roots(coefEqn)
+
+    zAll=[(F/lmd)**(1/2),-(F/lmd)**(1/2)]
+    selectedRoots=[selectTrueRoot(trueRootsAll,zAll)]
+    sortedRootsByAngle = sorted(selectedRoots, key=np.angle)
+    # taking lower pair
+    x2Tmp = sortedRootsByAngle[0]
+    x1Tmp = sortedRootsByAngle[1]
+    retVals = []
+    # cis
+    tmpCis = integralQuad(lmd, F, x1Tmp, x2Tmp) - (n + 1 / 2) * np.pi
+    retVals.append(tmpCis)
+
+    # trans
+    tmpTrans = integralQuad(lmd, F, x2Tmp, x1Tmp) - (n + 1 / 2) * np.pi
+    retVals.append(tmpTrans)
+    # cis another
+    tmpCisAnother = integralQuadBranchAnother(lmd, F, x1Tmp, x2Tmp) - (n + 1 / 2) * np.pi
+    retVals.append(tmpCisAnother)
+    # trans another
+    tmpTransAnother = integralQuadBranchAnother(lmd, F, x2Tmp, x1Tmp) - (n + 1 / 2) * np.pi
+    retVals.append(tmpTransAnother)
+
+    sortedRet = sorted(retVals, key=np.abs)
+    root0 = sortedRet[0]
+    return np.real(root0), np.imag(root0)
+
+
+def computeLargeLambdaUpper(inData):
+    """
+
+      :param inData: [n, lambda, Fest]
+      :return: [n, lambda, re(F), im(F)]
+      """
+    n, lmd, FEst = inData
+    FVecTmp = sopt.fsolve(eqnLargeLambdaUpperSymPair, [np.real(FEst), np.imag(FEst)], args=(n, lmd), maxfev=100,
+                          xtol=1e-6)
+    return [n, lmd, FVecTmp[0], FVecTmp[1]]
