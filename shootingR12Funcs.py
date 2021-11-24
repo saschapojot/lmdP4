@@ -47,7 +47,7 @@ def calcBoundaryValue(F,*data):
     F=F[0]
     lmd=data[0]
 
-    LEst=8
+    LEst=5
     theta=(- 1/ 4*(2/3)-1/14*(1/3)) * np.pi
     y0=LEst*np.exp(1j*theta)
 
