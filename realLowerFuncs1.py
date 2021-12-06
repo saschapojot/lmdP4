@@ -101,7 +101,7 @@ def eqnLargeLambdaLowerSymPair(FIn,*data):
     coefEqn = [-1j, 0, 0, lmd, 0, -F]
     trueRootsAll = np.roots(coefEqn)
     ###############asymp roots when large lambda >>|F|^(3/5)
-    y3n0s = [np.exp(1j * (4 * n * np.pi - np.pi) / 6) * lmd ** (1 / 3) for n in range(0, 3)]
+    y3n0s = [np.exp(1j * (4 * n * np.pi - np.pi) / 6) * lmd ** (1 / 3) for n in [-1,0]]
 
     y3ns = [ytmp + F * 1 / (2 * lmd * ytmp - 5 * 1j * ytmp ** 4) for ytmp in y3n0s]
 
@@ -164,9 +164,7 @@ def eqnSmallLambdaLowerSymPair(FIn, *data):
     # taking lower pair
     x2Tmp = sortedRootsByAngle[0]
     x1Tmp = sortedRootsByAngle[1]
-    if np.abs(np.real(x1Tmp-x2Tmp))<1e-10:
-        print(x1Tmp)
-        print(x2Tmp)
+
     retVals = []
     # cis
 
