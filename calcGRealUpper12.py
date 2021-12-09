@@ -21,17 +21,24 @@ for nTmp in levelsAll:
         inDataAll.append([nTmp,gTmp,EEst])
 
 
-
+###########################################################
+####sep computation
 #############parallel computation for sep, may be memory consuming
-tParalSepStart=datetime.now()
-pool2=Pool(threadNum)
-retAllSep=pool2.map(computeOneSolutionWith5SepPairs,inDataAll)
-tParalSepEnd=datetime.now()
-print("parallel WKB time for sep pairs: ",tParalSepEnd-tParalSepStart)
-
+# tParalSepStart=datetime.now()
+# pool2=Pool(threadNum)
+# retAllSep=pool2.map(computeOneSolutionWith5SepPairs,inDataAll)
+# tParalSepEnd=datetime.now()
+# print("parallel WKB time for sep pairs: ",tParalSepEnd-tParalSepStart)
 #################################end of parallel computation
-
-
+###############serial computation for sep, may be time consuming
+tSerialSepStart=datetime.now()
+retAllSep=[]
+for itmTmp in inDataAll:
+    n,g,E=computeOneSolutionWith5SepPairs(itmTmp)
+    retAllSep.append([n,g,E])
+tSerialSepEnd=datetime.now()
+print("serial WKB time for sep pairs: ",tSerialSepEnd-tSerialSepStart)
+############################################################
 #data serialization for sep
 nSctValsSep=[]
 gSctValsSep=[]
@@ -39,7 +46,7 @@ ERealSctValsSep=[]
 
 #data serialization for sep
 for itemTmp in retAllSep:
-    nTmp,gTmp,ERe,EIm=itemTmp
+    nTmp,gTmp,ERe=itemTmp
     if ERe<0 or ERe>40:
         continue
     nSctValsSep.append(nTmp)

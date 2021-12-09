@@ -1,7 +1,7 @@
 from gRealR12Funcs import *
 
 
-num=1
+num=30
 startG=1e-4
 stopG=1e1
 gnIndAll = np.linspace(start=np.log10(startG), stop=np.log10(stopG), num=num)
@@ -20,16 +20,25 @@ for nTmp in levelsAll:
         EEst=(nTmp+1/2)*np.pi
         inDataAll.append([nTmp,gTmp,EEst])
 
-
-# ###########parallel computation part for adj, may be memory consuming
-tWKBParalStart = datetime.now()
-pool1 = Pool(threadNum)
-retAllAdj=pool1.map(computeOneSolutionWith5AdjacentPairs,inDataAll)
-tWKBParalEnd = datetime.now()
-print("parallel WKB time for adj pairs: ", tWKBParalEnd - tWKBParalStart)
+############################################################################
+######Adj computation
+# ###########parallel computation  for adj, may be memory consuming
+# tWKBParalStart = datetime.now()
+# pool1 = Pool(threadNum)
+# retAllAdj=pool1.map(computeOneSolutionWith5AdjacentPairs,inDataAll)
+# tWKBParalEnd = datetime.now()
+# print("parallel WKB time for adj pairs: ", tWKBParalEnd - tWKBParalStart)
 #################end of parallel computation
-
-
+###############serial computation for adj, may be time consuming
+tWKBSerialStart=datetime.now()
+retAllAdj=[]
+for itmTmp in inDataAll:
+    n,g,E=computeOneSolutionWith5AdjacentPairs(itmTmp)
+    retAllAdj.append([n,g,E])
+tWKBSerialEnd=datetime.now()
+print("Serial WKB for adj pairs: ",tWKBSerialEnd-tWKBSerialStart)
+#################end of serial computation
+####################################end of adj computation
 tPltStart = datetime.now()
 
 # # # plot WKB
@@ -47,8 +56,8 @@ ERealSctValsAdj = []
 #data serialization for adj
 for itemTmp in retAllAdj:
     nTmp, gTmp, ERe = itemTmp
-    # if ERe<0 or ERe>40:
-    #     continue
+    if ERe<0 or ERe>40:
+        continue
     nSctValsAdj.append(nTmp)
     gSctValsAdj.append(gTmp)
     ERealSctValsAdj.append(ERe)
