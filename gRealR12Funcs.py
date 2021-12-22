@@ -164,7 +164,7 @@ def computeOneSolutionWith5AdjacentPairs(inData):
     n, g, Eest = inData
     E ,infoDict,iErr,msg= sopt.fsolve(eqnFiveAdjacentPairs, Eest, args=(n, g), maxfev=100, xtol=1e-8,full_output=True)
     if iErr==1:
-        return [n, g, E]
+        return [n, g, E[0]]
     else:
         return [n,g,-100]
 
