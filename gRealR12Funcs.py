@@ -6,6 +6,7 @@ from multiprocessing import Pool
 import scipy.special as sspecial
 import mpmath
 from mpmath import mp
+import  pandas as pd
 mp.dps=100
 
 
@@ -161,9 +162,11 @@ def computeOneSolutionWith5AdjacentPairs(inData):
     :return: [n, g, E]
     """
     n, g, Eest = inData
-    E = sopt.fsolve(eqnFiveAdjacentPairs, Eest, args=(n, g), maxfev=100, xtol=1e-6)[0]
-    return [n, g, E]
-
+    E ,infoDict,iErr,msg= sopt.fsolve(eqnFiveAdjacentPairs, Eest, args=(n, g), maxfev=100, xtol=1e-8,full_output=True)
+    if iErr==1:
+        return [n, g, E]
+    else:
+        return [n,g,-100]
 
 
 def eqnFiveSepPairs(EIn,*data):
@@ -219,5 +222,5 @@ def computeOneSolutionWith5SepPairs(inData):
     :return: [n, g,E]
     """
     n, g, Eest = inData
-    E= sopt.fsolve(eqnFiveSepPairs, Eest, args=(n, g), maxfev=100, xtol=1e-6)
+    E= sopt.fsolve(eqnFiveSepPairs, Eest, args=(n, g), maxfev=100, xtol=1e-6)[0]
     return [n, g,E]

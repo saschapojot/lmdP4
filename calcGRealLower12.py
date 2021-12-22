@@ -1,7 +1,7 @@
 from gRealR12Funcs import *
 
 
-num=30
+num=15
 startG=1e-4
 stopG=1e1
 gnIndAll = np.linspace(start=np.log10(startG), stop=np.log10(stopG), num=num)
@@ -10,8 +10,8 @@ gAll = [10 ** elem for elem in gnIndAll]
 
 threadNum = 24
 # energyLevelMax = 4
-levelStart=0
-levelEnd=3
+levelStart=2
+levelEnd=levelStart
 levelsAll = range(levelStart, levelEnd + 1)
 inDataAll=[]
 
@@ -23,20 +23,20 @@ for nTmp in levelsAll:
 ############################################################################
 ######Adj computation
 # ###########parallel computation  for adj, may be memory consuming
-# tWKBParalStart = datetime.now()
-# pool1 = Pool(threadNum)
-# retAllAdj=pool1.map(computeOneSolutionWith5AdjacentPairs,inDataAll)
-# tWKBParalEnd = datetime.now()
-# print("parallel WKB time for adj pairs: ", tWKBParalEnd - tWKBParalStart)
+tWKBParalStart = datetime.now()
+pool1 = Pool(threadNum)
+retAllAdj=pool1.map(computeOneSolutionWith5AdjacentPairs,inDataAll)
+tWKBParalEnd = datetime.now()
+print("parallel WKB time for adj pairs: ", tWKBParalEnd - tWKBParalStart)
 #################end of parallel computation
 ###############serial computation for adj, may be time consuming
-tWKBSerialStart=datetime.now()
-retAllAdj=[]
-for itmTmp in inDataAll:
-    n,g,E=computeOneSolutionWith5AdjacentPairs(itmTmp)
-    retAllAdj.append([n,g,E])
-tWKBSerialEnd=datetime.now()
-print("Serial WKB for adj pairs: ",tWKBSerialEnd-tWKBSerialStart)
+# tWKBSerialStart=datetime.now()
+# retAllAdj=[]
+# for itmTmp in inDataAll:
+#     n,g,E=computeOneSolutionWith5AdjacentPairs(itmTmp)
+#     retAllAdj.append([n,g,E])
+# tWKBSerialEnd=datetime.now()
+# print("Serial WKB for adj pairs: ",tWKBSerialEnd-tWKBSerialStart)
 #################end of serial computation
 ####################################end of adj computation
 tPltStart = datetime.now()
@@ -65,7 +65,7 @@ for itemTmp in retAllAdj:
 #write data of adj to csv
 adjDfData=np.array([gSctValsAdj,ERealSctValsAdj]).T
 adjDf=pd.DataFrame(adjDfData,columns=["g","E"])
-adjDf.to_csv("adjGRealR12.csv")
+adjDf.to_csv("level"+str(levelStart)+"adjGRealR12.csv")
 
 #load shooting data
 # prefix="startL4"
