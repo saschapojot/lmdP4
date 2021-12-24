@@ -4,6 +4,9 @@ import scipy.optimize as sopt
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 from datetime import datetime
+import math
+import warnings
+warnings.simplefilter("error")
 eps=1e-8
 
 def Q(y, lmd, F):
@@ -11,6 +14,7 @@ def Q(y, lmd, F):
 
 
 def f1(y, lmd, F):
+
     return -1 / 4 * (2 * lmd * y - 5 * 1j * y ** 4) / Q(y, lmd, F) + Q(y, lmd, F) ** (1 / 2)
 
 
@@ -42,20 +46,20 @@ def selectStartingPoint(y0,lmd,F):
     else:
         return y0
 
-
+LEst=4
 def calcBoundaryValue(F,*data):
     F=F[0]
     lmd=data[0]
 
-    LEst=5
-    theta=(- 1/ 4*(2/3)-1/14*(1/3)) * np.pi
+
+    theta=(- 1/ 4*(1/2)-1/14*(1/2)) * np.pi
     y0=LEst*np.exp(1j*theta)
 
 
     while np.abs(Q(y0,lmd,F))<eps:
         y0=selectStartingPoint(y0,lmd,F)
 
-    hAbsEst=1e-2
+    hAbsEst=1e-4
     Ls=np.abs(y0)
     Ns=int(Ls/hAbsEst)
     h=-Ls/Ns*np.exp(1j*theta)
@@ -63,11 +67,13 @@ def calcBoundaryValue(F,*data):
     zAll=[1]
     vAll=[f1(y0,lmd,F)]
 
+
     for j in range(0,Ns):
         yCurr=yAll[-1]
         zCurr=zAll[-1]
         vCurr=vAll[-1]
         zNext,vNext=oneStepRk4(lmd,F,h,yCurr,zCurr,vCurr)
+
         yNext=yCurr+h
         yAll.append(yNext)
         zAll.append(zNext)
@@ -84,6 +90,13 @@ def computeOneSolution(inData):
     :return:
     """
     lmd,FEst=inData
-
-    FVal=sopt.fsolve(calcBoundaryValue,FEst,args=(lmd),maxfev=100,xtol=1e-6)[0]
-    return [lmd,FVal]
+    # try:
+    #     FVal=sopt.fsolve(calcBoundaryValue,FEst,args=(lmd),maxfev=100,xtol=1e-6)[0]
+    # except RuntimeWarning:
+    #     print("warning catched")
+    #     return [lmd,-100]
+    FVal,infoDict,ier,msg = sopt.fsolve(calcBoundaryValue, FEst, args=(lmd), maxfev=100, xtol=1e-8,full_output=True)
+    if ier==1:
+        return [lmd,FVal[0]]
+    else:
+        return [lmd,-100]
