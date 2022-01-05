@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 from datetime import datetime
 import math
-import warnings
-warnings.simplefilter("error")
+
+
 eps=1e-8
 
 def Q(y, lmd, F):
@@ -95,7 +95,7 @@ def computeOneSolution(inData):
     # except RuntimeWarning:
     #     print("warning catched")
     #     return [lmd,-100]
-    FVal,infoDict,ier,msg = sopt.fsolve(calcBoundaryValue, FEst, args=(lmd), maxfev=100, xtol=1e-8,full_output=True)
+    FVal,infoDict,ier,msg = sopt.fsolve(calcBoundaryValue, FEst, args=(lmd), maxfev=100, xtol=1e-10,full_output=True)
     if ier==1:
         return [lmd,FVal[0]]
     else:
